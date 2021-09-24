@@ -103,8 +103,19 @@ button.ui.button.claim-button:disabled {
   /* width: 100vw; */
 }
 
+.button-top {
+  margin-top: 300px !important;
+}
+
 @media only screen and (max-width: 600px) {
   .bgVideo {
     width: 100vw;
   }
+  .button-top {
+    margin-top: 0 !important;
+  }
 }
+
+
+
+
