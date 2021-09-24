@@ -28,6 +28,7 @@ const RisingSunTracker = () => {
     // added newly
     const [claimableDividends, setClaimableDividends] = useState(0);
     const [totalDividendsAccumulated, setTotalDividendsAccumulated] = useState("0");
+    const [arr, setIdArr] = useState([100, 101]);
 
     const connect = async () => {
         web3Provider = Object.keys(window).includes('ethereum') ? new ethers.providers.Web3Provider(window.ethereum, "any") : Object.keys(window).includes('web3') ? new ethers.providers.Web3Provider(window.web3, "any") : undefined;
@@ -71,7 +72,7 @@ const RisingSunTracker = () => {
     const claimDividendsFor = async () => {
         if (signer) {
             const madlads_write = writableContract();
-            madlads_write.claimDividendsFor( [0, 1], RSUN_ADR).then(res => console.log(res)).catch(e => console.error(e))
+            madlads_write.claimDividendsFor(arr, RSUN_ADR).then(res => console.log(res)).catch(e => console.error(e))
         }
         else alert("Please connect your wallet");
     } 
