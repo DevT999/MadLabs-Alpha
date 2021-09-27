@@ -118,7 +118,7 @@ const RisingSunTracker = () => {
             <div className="rsun-tracker-container">
                 <img className="logoImage" src="./logo.jpg" alt="logo" />
                 <Button type="button" className={"rsun-tracker-button wallet-button connect-button" + (connected ? " hidden" : "")} onClick={connect}>Connect</Button>
-                <Button type="button" className={"rsun-tracker-button wallet-button connect-button" + (!connected ? " hidden" : "")} onClick={disconnect}>{getButtonText()}</Button>
+                <Button type="button" className={"rsun-tracker-button wallet-button connect-button" + (!connected ? " hidden" : "")} onClick={disconnect}>Disconnect</Button>
                 {/* <span className="wallet-button-text">(Metamask and Trustwallet only)</span> */}
 
                 <div className="title-section">
