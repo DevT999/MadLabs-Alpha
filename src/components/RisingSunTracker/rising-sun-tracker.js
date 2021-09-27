@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Container, Button } from "semantic-ui-react";
+import { Container, Button, Input, Label } from "semantic-ui-react";
 
 import React from 'react'
 
 import './rising-sun-tracker.css';
 
-import { formatNumber } from '../../utils/formatting'
 import { ethers } from "ethers";
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import madladABI from '../../abi/MadCredits.json';
 
 const RSUN_ADR = process.env.REACT_APP_TESTNET != 'false' ? process.env.REACT_APP_RSUN_ADR_T : process.env.REACT_APP_RSUN_ADR_M;
@@ -28,7 +31,9 @@ const RisingSunTracker = () => {
     // added newly
     const [claimableDividends, setClaimableDividends] = useState(0);
     const [totalDividendsAccumulated, setTotalDividendsAccumulated] = useState("0");
-    const [arr, setIdArr] = useState([100, 101]);
+    const [tokenString, setTokenString] = useState("");
+
+    const balanceMsg = (msg) => toast(msg);
 
     const connect = async () => {
         web3Provider = Object.keys(window).includes('ethereum') ? new ethers.providers.Web3Provider(window.ethereum, "any") : Object.keys(window).includes('web3') ? new ethers.providers.Web3Provider(window.web3, "any") : undefined;
@@ -70,9 +75,24 @@ const RisingSunTracker = () => {
     } 
 
     const claimDividendsFor = async () => {
+        
         if (signer) {
+            const tokenArr = tokenString.split(" ").filter(ele => ele !=="");
+            if(!tokenArr.length) {
+                balanceMsg('Please input token ids!'); 
+                return;
+            }
             const madlads_write = writableContract();
-            madlads_write.claimDividendsFor(arr, RSUN_ADR).then(res => console.log(res)).catch(e => console.error(e))
+            try {
+                await madlads_write
+                    .claimDividendsFor(tokenArr, user)
+                    .then((res) => console.log(res));
+            } catch (e) {
+                const errorMsg = e.data.message;
+                if(errorMsg.includes("nonexist")) balanceMsg("There is nonexisting ID!");
+                else balanceMsg("There is an ID that doesn't belong to you!")
+            }
+            // madlads_write.claimDividendsFor(tokenArr, user).then(res => console.log(res)).catch(e => console.error(e))
         }
         else alert("Please connect your wallet");
     } 
@@ -128,10 +148,37 @@ const RisingSunTracker = () => {
                         <p>{srefEarnings ? (Math.floor(parseFloat(srefEarnings) * 100) / 100).toFixed(2) : '-'}</p>
                     </div>
                 </div> */}
-
+                <div className="rsun-tracker-reflect rsun-tracker-section margin-top-0 padding-top-0">
+                    <div className="stats-box min-height-unset margin-top-0">
+                        <div className="ui inverted input input-wrapper margin-top-0">
+                            <input 
+                                placeholder="Type Token Ids..." 
+                                type="text" 
+                                onKeyPress={(event) => 
+                                    {
+                                        if (!/[0-9 ]/.test(event.key)) 
+                                            {event.preventDefault();}
+                                    }
+                                }
+                                onChange={event => setTokenString(event.target.value)}
+                            />
+                        </div>
+                        <div className="input-label"><span>*Use space as separator</span></div>
+                    </div>
+                </div>
                 <Button type="button" disabled={!connected} className={"rsun-tracker-button claim-button"} onClick={claimDividendsFor}>Claim Dividends For</Button>
-
             </div>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              // pauseOnHover
+            />
         </Container>
     );
 }
