@@ -40,10 +40,11 @@ const RisingSunTracker = () => {
 
         // Prompt user for account connections
         if (web3Provider && !signer) {
-            await web3Provider.send("eth_requestAccounts", []);
+            // await web3Provider.send("eth_requestAccounts", []);
             signer = web3Provider.getSigner();
             const chainId = await signer.getChainId();
-            if((!process.env.REACT_APP_TESTNET && chainId === 56) || (process.env.REACT_APP_TESTNET && chainId === 97)) {
+            if((process.env.REACT_APP_TESTNET === 'false' && chainId === 56) || (process.env.REACT_APP_TESTNET === 'true' && chainId === 97)) {
+                await madlads.totalDividendsAccumulated().then(res => setTotalDividendsAccumulated((res.div(ethers.BigNumber.from(1e15))).toNumber()/1000.0));
                 const bal = await signer.getBalance();
                 if(bal.eq(0)) {
                     balanceMsg("Your wallet balance is 0!");
@@ -53,7 +54,6 @@ const RisingSunTracker = () => {
                 const adr = await signer.getAddress();
                 setUser(adr);
                 await madlads.claimableDividends(adr).then(res => setClaimableDividends(res.toString()));
-                await madlads.totalDividendsAccumulated().then(res => setTotalDividendsAccumulated((res.div(ethers.BigNumber.from(1e15))).toNumber()/1000.0));
                 setConnected(true)
             }
             else {
@@ -113,15 +113,6 @@ const RisingSunTracker = () => {
     const writableContract = () => {
         return new ethers.Contract(RSUN_ADR, madladABI, signer);
     }
-    
-    const truncate = (input, length) => input.length > length ? `${input.substring(0, length)}...` : input;
-
-    const getButtonText = () => {
-        if (signer) {
-            return `${truncate(user,6,)}`;
-        }
-        return `CONNECT`;
-    };
 
     return (
         <Container>
