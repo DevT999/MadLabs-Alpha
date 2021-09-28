@@ -42,11 +42,24 @@ const RisingSunTracker = () => {
         if (web3Provider && !signer) {
             await web3Provider.send("eth_requestAccounts", []);
             signer = web3Provider.getSigner();
-            const adr = await signer.getAddress();
-            setUser(adr);
-            await madlads.claimableDividends(adr).then(res => setClaimableDividends(res.toNumber()));
-            await madlads.totalDividendsAccumulated().then(res => setTotalDividendsAccumulated(res.toString()));
-            setConnected(true)
+            const chainId = await signer.getChainId();
+            if((!process.env.REACT_APP_TESTNET && chainId === 56) || (process.env.REACT_APP_TESTNET && chainId === 97)) {
+                const bal = await signer.getBalance();
+                if(bal.eq(0)) {
+                    balanceMsg("Your wallet balance is 0!");
+                    signer = undefined;
+                    return;
+                }
+                const adr = await signer.getAddress();
+                setUser(adr);
+                await madlads.claimableDividends(adr).then(res => setClaimableDividends(res.toString()));
+                await madlads.totalDividendsAccumulated().then(res => setTotalDividendsAccumulated((res.div(ethers.BigNumber.from(1e15))).toNumber()/1000.0));
+                setConnected(true)
+            }
+            else {
+                signer = undefined;
+                balanceMsg("Wrong Network!");
+            }
         }
     }
 
